@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Encrypted Communication</title>
+    <meta charset="utf-8">
+    <style>
+      @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+      @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body {
+        font-family: 'Helvetica';
+      }
+
+      p {
+        font-size: 1.5em;
+      }
+
+      h1, h2, h3 {
+      }
+
+      blockquote {
+        background-color: lightgrey;
+        background: #f9f9f9;
+        border-left: 10px solid #ccc;
+        margin: 1.5em 10px;
+        padding: 0.5em 10px;
+        quotes: "\201C""\201D""\2018""\2019";
+        padding: 10px;
+        border-radius: 5px 5px;
+      }
+
+      blockquote:before {
+        color: #ccc;
+        content: open-quote;
+        font-size: 4em;
+        line-height: 0.1em;
+        margin-right: 0.1em;
+        vertical-align: -0.4em;
+      }
+
+      blockquote p {
+        display: inline;
+      }
+
+      .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
+
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle
+
+# Some Title About Encryption and Trusted Communication
+
+---
+
+## Encryption or Encipherment, briefly:
+
+**Plaintext**, with some sort of obfuscation applied, results in illegible **ciphertext**.
+
+A recipient needs some way to 'undo' the encipherment to arrive back at the **plaintext** message.
+
+```
+plaintext: HELLO
+resulting ciphertext: SLFFM
+```
+
+How to get from 'SLFFM' to 'HELLO'??
+
+---
+
+class: center, middle
+
+# A few simple examples
+
+---
+
+## Caesar Cipher
+
+![caesar-shift](caesar-shift.png)
+
+- Represent each plaintext letter with a different letter in the cipher by shifting some fixed number of spaces down the alphabet
+
+```
+plaintext: FACE
+ciphertext: CXZB
+```
+
+---
+
+## Substitution Cipher
+
+- Using a keyword, plaintext letters are substituted with an alternate ciphertext alphabet
+
+```
+plaintext alphabet: ABCDEFGHIJKLMNOPQRSTUVWXYZ
+ciphertxt alphabet: ZEBRASCDFGHIJKLMNOPQTUVWXY
+
+plaintext message: FLEE AT ONCE. WE ARE DISCOVERED!
+becomes ciphertxt: SIAA ZQ LKBA. VA ZOA RFPBLUAOAR!
+```
+
+- Without knowledge of the ciphertext alphabet, it's difficult (though not impossible) to arrive at the plaintext message.
+- Eventually, trying all possible combinations of letters will crack this.
+
+---
+
+class: center, middle
+
+# Getting computers involved
+
+---
+
+## binary!
+
+- ASCII characters can be represented as binary numbers:
+
+```
+1000001 - A
+1000010 - B
+1000011 - C
+1000100 - D
+1000101 - E
+1000110 - F
+1000111 - G
+1001000 - H
+```
+
+- `HELLO` in binary:
+    - `01001000 01000101 01001100 01001100 01001111`
+- `DAVID` in binary:
+    - `01000100 01000001 01010110 01001001 01000100`
+
+### binary addition
+
+- two simple rules:
+     - if the numbers are the same, result is `0`
+     - if the numbers are different, result is `1`
+---
+
+## Encipherment with binary addition
+
+```
+HELLO = 10010001000101100110010011001001111
+```
+
+- message: `HELLO`
+
+---
+
+## Encipherment with binary addition
+
+```
+HELLO = 10010001000101100110010011001001111
+DAVID = 10001001000001101011010010011000100
+```
+
+- message: `HELLO`
+- key: `DAVID`
+
+---
+
+## Encipherment with binary addition
+
+```
+HELLO = 10010001000101100110010011001001111
+DAVID = 10001001000001101011010010011000100
+-------------------------------------------------------
+        00011000000100001101000001010001011 --> CIPHERTEXT
+```
+
+- message: `HELLO`
+- key: `DAVID`
+- result after binary addition
+
+---
+
+## Encipherment with binary addition
+
+```
+HELLO = 10010001000101100110010011001001111
+DAVID = 10001001000001101011010010011000100
+-------------------------------------------------------
+        00011000000100001101000001010001011 --> CIPHERTEXT
+```
+
+- message: `HELLO`
+- key: `DAVID`
+- result after binary addition
+
+A recipient of the ciphertext who knows the key can deciper back to the plaintext by running the binary addition on it again
+
+```
+CIPHERTEXT = 00011000000100001101000001010001011
+DAVID      = 10001001000001101011010010011000100
+-------------------------------------------------------
+             10010001000101100110010011001001111 = HELLO
+```
+---
+class:  center
+
+
+## Computers can do this very quickly, but there's a fundamental issue...
+
+--
+
+## ...Both parties need to know the key.
+
+---
+
+### During World War II, huge books of keys were distributed far and wide, very often.
+
+
+--
+
+### They were vulnerable to interception, not to mention posing a massive logistical nightmare.
+
+--
+
+### As businesses began to adopt this secure form of cryptography, they, too, needed to share keys with their collaborators.
+
+--
+
+## Key distribution seemed like an insurmountable problem!
+
+---
+
+class: center
+
+# Until this guy came around :)
+
+![diffie](diffie.jpg)
+
+Whitfield Diffie
+
+---
+
+## Diffie
+
+In the early days of the ARPANet in the 70s, Diffie had the foresight to realize that this internet thing was going to be huge and that people would need to be able to communicate securely around the world.
+
+--
+
+He believed ordinary people had a _right_ to privacy via encryption and that the crux of that would be solving key exchange.
+
+--
+
+Diffie met Martin Hellman in 1974 and together they ...figured it out.
+
+---
+
+## Alice, Bob and Eve
+
+Alice wants to send a secret to Bob, Eve wants to eavesdrop.  
+At the post office:
+
+--
+
+
+1. Alice puts her message in a box and puts _HER_ lock on it, drops it in the mailbox
+
+--
+
+2. Bob collects the box, puts _HIS_ lock on it **also** - back into the mailbox
+
+--
+
+3. Alice takes _HER_ original lock off, leaving Bob's only. Puts it in the mailbox again
+
+--
+
+4. Finally, Bob takes the box, removes _HIS_ final lock, and can open the box, revealing Alice's message.
+
+---
+
+## The conceputal motivator for Diffie and Hellman
+
+--
+
+Doesn't work in practice because of Last-On-First-Off
+
+--
+
+- The actual implementation used one-way math functions - functions that are easy to compute, but if you only have the result it's very difficult to derive the function.
+
+- **doubling a number** is a function that's easy to reverse...
+
+--
+
+- **mixing paint** is a 'function' that's impossible to reverse!
+
+---
+
+## Solving the key exchange problem
+
+--
+
+- Our shared key (remember `DAVID`?) is going to be a color, rather than a number.
+- Everyone has a bucket with yellow paint in it
+
+--
+
+1. Alice adds a secret green to hers, Bob adds secret red to his. They exchange them.
+
+--
+
+2. Alice adds green to Bob's bucket. (yellow base, Bob's red, Alice's green)
+
+--
+
+3. Bob adds red to Alice's bucket. (yellow base, Alice's green, Bob's red)
+
+--
+
+4. Now both of their colors are identical. This is their **shared key**!
+
+--
+
+**An eavesdropper couldn't get this secret.**
+
+---
+
+class: middle, center
+
+## This breakthrough was announced in 1976 and was the greatest revolution in cryptography in two thousand years.
+
+![diffie-hellman](diffie-hellman.jpg)
+
+---
+
+## ...But it was sort of a bummer at email-speed.
+
+--
+
+## Diffie realized that _asymmetrical keys_ were needed
+
+Different keys for encryption and de-cryption
+
+---
+
+## Back to the mailbox
+
+--
+
+- I make one thousand padlocks that all use the same, single, secret key. I keep these padlocks at the post office, and the key safe at my house.
+
+--
+
+- To send me a message, you put it in a box and simply click one of my padlocks closed on it. Nobody can open this - not even you.
+
+--
+
+- When I get it, I simply open the lock and read your message.
+
+--
+
+Diffie published this idea in outline but couldn't solve the math for it.
+
+---
+
+class: middle, center
+
+# Rivest, Shamir, Adelman. 1977
+
+![rsa](rsa.jpg)
+
+---
+
+## RSA Cryptosystem
+
+Ron Rivest designed a one-way function that worked just like the padlock example.
+
+--
+
+- `p * q = N`. (The actual function is way above my head.)
+
+
+--
+
+- `p` and `q` are big prime numbers
+    - `p = 17,159`
+    - `q = 10,247`
+
+
+--
+
+- Multiplying them together gives you `N`. In this case: `175,828,273`. With a large enough `N`, it would take millions of years to factor out `p` and `q`.
+
+--
+
+Alice chooses two secret numbers for `p` and `q`. She shares the resulting `N` with the world.
+
+`N` is her _public key_ - the "padlock". The combined `p` and `q` are her _private key_.
+
+---
+
+## Bob can use Alice's `N` public key in a special function that only someone who knows `p` and `q` can reverse. Not even the writer of the original message.
+
+--
+
+Safe, asymmetrical encryption without the need for prior key exchange.
+
+--
+
+## The design of that special function is the genius of the RSA system. It brought Diffie's idea into reality.
+
+---
+
+class:  center
+
+# ...But it still sort of sucked to use. So:
+
+--
+
+![zimmermann](zimmermann.jpg)
+
+This guy.
+
+---
+
+## Phil Zimmermann and PGP
+
+- RSA was hard to use and took a really long time to run on large messages.
+
+- It was difficult to use for sending many messages a day - like, in business.
+
+--
+
+- Zimmermann thought every individual had a right to absolute privacy, and so should be able to use reliable encryption, easily.
+
+--
+
+- His "Pretty Good Privacy" combined everything we've discussed so far, with a twist.
+
+---
+
+## PGP explained
+
+- Fast encryption on large messages requires a shared key. But that brings up the key exchange problem again... We'll call this faster, simpler method `QUICKEY`
+--
+
+- Bob rapidly encrypts his long message with `QUICKEY`.
+--
+
+- Then he encrypts the `QUICKEY` _itself_ with the robust RSA method for Alice.
+--
+
+- He delivers both the encrypted message **and** the encrypted `QUICKEY` to Alice.
+--
+
+- Alice uses her (RSA) private key to decrypt the `QUICKEY` Bob sent, then uses that to quickly decrypt the large message from Bob.
+--
+
+
+This all happens extremely quickly and automatically for the user in a point-and-click interface.  
+Email clients can easily include PGP and the user barely has to interact with it or know how it works.
+
+--
+
+- Additionally, aside from encrypting secrets, you can use this technology to "sign" a plaintext message. Proving unequivocally that _YOU_ sent this message, not an impostor, phisher or hacker.  
+- The same can be used to sign software packages so that someone downloading it can safely install it, knowing it wasn't tampered with or the download link hacked.
+
+---
+
+These cryptographic breakthroughs built upon each other (and centuries of cryptography before them) to bring **real** privacy, security and proof of identity to the internet and human communication in general.
+
+We use them every day to make SSH connections, trust SSL certificates on HTTPS sites, exchange Bitcoin, install software safely and more.
+
+--
+
+Hopefully the next time you encounter these technologies, you'll have a greater understanding of it and appreciation for the innovators who made it possible.
+
+--
+
+Go write your deepest, darkest secret and safely encrypt it with PGP. It's _really_ satisfying ;)
+
+---
+
+
+</textarea>
+    <script src="https://gnab.github.io/remark/downloads/remark-latest.min.js">
+    </script>
+    <script>
+      var slideshow = remark.create({
+        ratio: '4:3',
+        slideNumberFormat: '',
+      });
+    </script>
+  </body>
+</html>
